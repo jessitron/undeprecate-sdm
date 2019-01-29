@@ -41,9 +41,10 @@ export function machine(
         name: "change deprecated usage: regex",
         intent: "undeprecate1",
         transform: changeDeprecatedMethodWithRegex({
-
-        })
-    })
+            deprecatedMethodName: "createEntrySet",
+            replacementMethodName: "entrySet",
+        }),
+    });
 
     /*
      * this is a good place to type

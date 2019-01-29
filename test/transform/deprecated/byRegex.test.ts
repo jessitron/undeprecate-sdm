@@ -1,11 +1,12 @@
-import * as assert from "assert";
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
+import { PushAwareParametersInvocation, TransformResult, TransformReturnable } from "@atomist/sdm";
+import * as assert from "assert";
 import { changeDeprecatedMethodWithRegex } from "../../../lib/transform/deprecatedMethod/byRegex";
-import { PushAwareParametersInvocation } from "@atomist/sdm";
 
 const deprecatedMethodName = "createEntrySet";
+const replacementMethodName = "entrySet";
 
-const JavaFilename = "src/main/java/com/undeprecate/UseDeprecatedMethod.java"
+const JavaFilename = "src/main/java/com/undeprecate/UseDeprecatedMethod.java";
 const JavaFileCallingDeprecatedMethod = `package com.undeprecate;
 
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -15,7 +16,7 @@ import java.util.Set;
 
 public class UseDeprecatedMethod {
     public String carrot() {
-        
+
         ConcurrentHashMultiset<String> chm = ConcurrentHashMultiset.create();
         chm.add("foo");
 
@@ -28,17 +29,22 @@ public class UseDeprecatedMethod {
 }
 `;
 
-const fakePapi = {} as PushAwareParametersInvocation<NoParameters>;
+const fakePapi: PushAwareParametersInvocation<NoParameters> = {} as any;
+
+const deprecationSpec = {
+    deprecatedMethodName,
+    replacementMethodName,
+};
 
 describe("deprecating a method by regex", () => {
     it("changes the method usage", async () => {
 
-        const input = InMemoryProject.of({ path: JavaFilename, content: JavaFileCallingDeprecatedMethod })
+        const input = InMemoryProject.of({ path: JavaFilename, content: JavaFileCallingDeprecatedMethod });
 
         // I have a project that contains Java that calls the old method.
         // I want it to call the new one instead.
 
-        const result = changeDeprecatedMethodWithRegex({})(input, fakePapi);
+        const result: TransformReturnable = await changeDeprecatedMethodWithRegex(deprecationSpec)(input, fakePapi);
 
         const updatedContent = input.findFileSync(JavaFilename).getContentSync();
 
