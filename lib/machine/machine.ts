@@ -15,13 +15,16 @@
  */
 
 import {
+    CommandListenerInvocation,
     SoftwareDeliveryMachine,
     SoftwareDeliveryMachineConfiguration,
+    TransformResult,
 } from "@atomist/sdm";
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
 import { changeDeprecatedMethodWithRegex } from "../transform/deprecatedMethod/byRegex";
+import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 
 /**
  * Initialize an sdm definition, and add functionality to it.
@@ -44,6 +47,7 @@ export function machine(
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),
+        onTransformResults: actualGoodUsefulReactionToTransformResults,
     });
 
     /*
