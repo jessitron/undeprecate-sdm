@@ -21,6 +21,7 @@ import {
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
+import { changeDeprecatedMethodWithRegex } from "../transform/deprecatedMethod/byRegex";
 
 /**
  * Initialize an sdm definition, and add functionality to it.
@@ -35,6 +36,14 @@ export function machine(
         name: "Empty Seed Software Delivery Machine",
         configuration,
     });
+
+    sdm.addCodeTransformCommand({
+        name: "change deprecated usage: regex",
+        intent: "undeprecate1",
+        transform: changeDeprecatedMethodWithRegex({
+
+        })
+    })
 
     /*
      * this is a good place to type
