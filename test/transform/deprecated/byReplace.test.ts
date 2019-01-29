@@ -1,7 +1,7 @@
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
-import { PushAwareParametersInvocation, TransformResult, TransformReturnable } from "@atomist/sdm";
+import { PushAwareParametersInvocation, TransformReturnable } from "@atomist/sdm";
 import * as assert from "assert";
-import { changeDeprecatedMethodWithRegex } from "../../../lib/transform/deprecatedMethod/byRegex";
+import { changeDeprecatedMethodWithReplace } from "../../../lib/transform/deprecatedMethod/byReplace";
 
 const deprecatedMethodName = "createEntrySet";
 const replacementMethodName = "entrySet";
@@ -44,7 +44,8 @@ describe("deprecating a method by regex", () => {
         // I have a project that contains Java that calls the old method.
         // I want it to call the new one instead.
 
-        const result: TransformReturnable = await changeDeprecatedMethodWithRegex(deprecationSpec)(input, fakePapi);
+        const result: TransformReturnable = await changeDeprecatedMethodWithReplace(
+            deprecationSpec)(input, fakePapi);
 
         const updatedContent = input.findFileSync(JavaFilename).getContentSync();
 

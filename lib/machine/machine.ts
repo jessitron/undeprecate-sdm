@@ -23,7 +23,7 @@ import {
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
-import { changeDeprecatedMethodWithRegex } from "../transform/deprecatedMethod/byRegex";
+import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 
 /**
@@ -41,9 +41,9 @@ export function machine(
     });
 
     sdm.addCodeTransformCommand({
-        name: "change deprecated usage: regex",
+        name: "change deprecated usage by replace",
         intent: "undeprecate1",
-        transform: changeDeprecatedMethodWithRegex({
+        transform: changeDeprecatedMethodWithReplace({
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),

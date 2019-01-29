@@ -1,7 +1,7 @@
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
 import { CodeTransform } from "@atomist/sdm";
 
-export function changeDeprecatedMethodWithRegex(params: {
+export function changeDeprecatedMethodWithReplace(params: {
     deprecatedMethodName: string,
     replacementMethodName: string,
 }): CodeTransform {
