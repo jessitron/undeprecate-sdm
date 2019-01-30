@@ -1,7 +1,7 @@
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
 import { PushAwareParametersInvocation, TransformReturnable } from "@atomist/sdm";
 import * as assert from "assert";
-import { changeDeprecatedMethodWithReplace } from "../../../lib/transform/deprecatedMethod/byReplace";
+import { changeDeprecatedMethodWithAST } from "../../../lib/transform/deprecatedMethod/byMethodCall";
 
 const deprecatedMethodName = "createEntrySet";
 const replacementMethodName = "entrySet";
@@ -24,7 +24,7 @@ public class UseDeprecatedMethod {
 
         int len = entrySet.size();
 
-        return "carrot " + len;
+        return "createEntrySet " + len;
     }
 }
 `;
@@ -36,20 +36,21 @@ const deprecationSpec = {
     replacementMethodName,
 };
 
-describe("replace: deprecate a method", () => {
-    it("changes the method usage", async () => {
+describe("java AST: deprecating a method", () => {
+    it("changes the method usage but not a string", async () => {
 
         const input = InMemoryProject.of({ path: JavaFilename, content: JavaFileCallingDeprecatedMethod });
 
         // I have a project that contains Java that calls the old method.
         // I want it to call the new one instead.
 
-        const result: TransformReturnable = await changeDeprecatedMethodWithReplace(
+        const result: TransformReturnable = await changeDeprecatedMethodWithAST(
             deprecationSpec)(input, fakePapi);
 
         const updatedContent = input.findFileSync(JavaFilename).getContentSync();
 
-        assert(!updatedContent.includes(deprecatedMethodName), updatedContent);
-
+        assert(!updatedContent.includes("chm." + deprecatedMethodName), "Didn't change method call");
+        assert(updatedContent.includes(`"createEntrySet "`), "Did change string");
+        assert(updatedContent.includes(`entrySet.size();`), "Did change a different method call");
     });
 });

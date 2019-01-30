@@ -23,6 +23,7 @@ import {
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
+import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 
@@ -44,6 +45,16 @@ export function machine(
         name: "change deprecated usage by replace",
         intent: "undeprecate1",
         transform: changeDeprecatedMethodWithReplace({
+            deprecatedMethodName: "createEntrySet",
+            replacementMethodName: "entrySet",
+        }),
+        onTransformResults: actualGoodUsefulReactionToTransformResults,
+    });
+
+    sdm.addCodeTransformCommand({
+        name: "change deprecated usage by AST",
+        intent: "undeprecate2",
+        transform: changeDeprecatedMethodWithAST({
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),
