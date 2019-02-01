@@ -26,7 +26,7 @@ describe("having an import", () => {
 
         const result: boolean = await javaFile.hasImport("existing.imported.Thinger", p, JavaFilename);
 
-        assert(!result, "That import is there");
+        assert(result, "That import is there");
     });
 
     it("sees an import that is imported with .*", async () => {
@@ -34,6 +34,6 @@ describe("having an import", () => {
 
         const result: boolean = await javaFile.hasImport("existing.imported.dotStar.Something", p, JavaFilename);
 
-        assert(!result, "That import is included in a .*");
+        assert(result, "That import is included in a .*");
     });
 });
