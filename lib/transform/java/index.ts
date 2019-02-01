@@ -32,8 +32,7 @@ export async function addImport(p: Project, importName: string, file: ProjectFil
     if (astHasImport(importName, parsed)) {
         return;
     }
-    const allImportsPxe =
-        `//importDeclaration`;
+    const allImportsPxe = `//importDeclaration`;
     const allImportMatches = evaluateExpression(parsed, allImportsPxe);
     if (!isSuccessResult(allImportMatches)) {
         throw new Error("Error seeking imports: " + allImportMatches);

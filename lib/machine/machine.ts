@@ -25,6 +25,7 @@ import {
 } from "@atomist/sdm-core";
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
+import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/byReplace";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 
 /**
@@ -37,7 +38,7 @@ export function machine(
 ): SoftwareDeliveryMachine {
 
     const sdm = createSoftwareDeliveryMachine({
-        name: "Empty Seed Software Delivery Machine",
+        name: "Undeprecating SDM",
         configuration,
     });
 
@@ -58,6 +59,14 @@ export function machine(
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),
+        onTransformResults: actualGoodUsefulReactionToTransformResults,
+    });
+
+    sdm.addCodeTransformCommand({
+        name: "undeprecate emptyIterator",
+        description: "change deprecated emptyIterator to modern one",
+        intent: "update emptyIterator",
+        transform: replaceGuavaMethodWithStandard(),
         onTransformResults: actualGoodUsefulReactionToTransformResults,
     });
 

@@ -34,10 +34,10 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
 
         assert(!newContent.includes("Iterators.emptyIterator"), "replace old method");
         assert(newContent.includes("Collections.emptyIterator"), "with new method");
-        assert(javaFile.hasImport("java.util.Collections",
+        assert(await javaFile.hasImport("java.util.Collections",
             file), "have new import");
-        assert(!javaFile.hasImport("com.google.common.collect.Iterators",
-            file), "not old import");
+        assert(!(await javaFile.hasImport("com.google.common.collect.Iterators",
+            file)), "not old import");
 
     });
 });
