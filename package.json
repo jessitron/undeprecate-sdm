@@ -22,7 +22,7 @@
   "types": "./index.d.ts",
   "dependencies": {
     "@atomist/antlr": "^1.0.2",
-    "@atomist/automation-client": "^1.2.0",
+    "@atomist/automation-client": "^1.3.0-master.20190131044443",
     "@atomist/sdm": "^1.2.0",
     "@atomist/sdm-core": "^1.2.0"
   },

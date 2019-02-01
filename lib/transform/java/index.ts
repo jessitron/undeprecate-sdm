@@ -1,6 +1,7 @@
 import { Java9FileParser } from "@atomist/antlr";
 import { astUtils, Project, ProjectFile } from "@atomist/automation-client";
 import { evaluateExpression, isSuccessResult, TreeNode } from "@atomist/tree-path";
+import { matchIterator } from "@atomist/automation-client/lib/tree/ast/astUtils";
 
 export async function hasImport(importName: string, file: ProjectFile): Promise<boolean> {
     // we could also check for a static, but I think that'd be separate
@@ -26,7 +27,7 @@ function astHasImport(importName: string, javaAST: TreeNode): boolean {
     return false;
 }
 
-export async function addImport(importName: string, file: ProjectFile): Promise<void> {
+export async function addImport(p: Project, importName: string, file: ProjectFile): Promise<void> {
     const parsed = await Java9FileParser.toAst(file);
     if (astHasImport(importName, parsed)) {
         return;
@@ -49,6 +50,18 @@ export async function addImport(importName: string, file: ProjectFile): Promise<
     console.log("setting import");
     lastImport.$value = lastImport.$value + `\nimport ${importName};`;
 
+    const it = await matchIterator(p, {
+        globPatterns: file.path,
+        pathExpression: allImportsPxe,
+        parseWith: Java9FileParser,
+    });
+    for await (const m of it) {
+       // console.log(JSON.stringify(m));
+        m.$value = `import ${importName};\n${m.$value}`;
+        console.log("Doing magic: value=" + m.$value)
+
+        break;
+    }
 }
 
 function dropClassName(qualifiedClass: string): string {
