@@ -42,13 +42,10 @@ export async function addImport(importName: string, p: Project, path: string): P
         parseWith: Java9FileParser,
     });
     for await (const m of it) {
-        // console.log(JSON.stringify(m));
         m.$value = `import ${importName};\n${m.$value}`;
         console.log("Doing magic: value=" + m.$value);
-
-        //  break;
+        break;
     }
-    (p as any).flush(); // still doesn't help
 }
 
 function dropClassName(qualifiedClass: string): string {
