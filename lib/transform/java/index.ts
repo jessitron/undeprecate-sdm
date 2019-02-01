@@ -12,8 +12,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: specificPackageImport,
         parseWith: Java9FileParser,
     });
-    for await (const m of it) {
-        console.log("use m1 " + !!m);
+    for await (const { } of it) {
         return true;
     }
 
@@ -24,8 +23,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: dotStarImport,
         parseWith: Java9FileParser,
     });
-    for await (const m of it2) {
-        console.log("use m2 " + !!m);
+    for await (const { } of it2) {
         return true;
     }
 
