@@ -1,4 +1,4 @@
-import { InMemoryFile } from "@atomist/automation-client/lib/project/mem/InMemoryFile";
+import { InMemoryProject } from "@atomist/automation-client";
 import * as assert from "assert";
 import * as javaFile from "../../../lib/transform/java";
 
@@ -13,25 +13,26 @@ class HappyCow {}
 
 describe("having an import", () => {
     it("does not see an import it does not have", async () => {
-        const inputFile = new InMemoryFile(JavaFilename, JavaContent);
 
-        const result: boolean = await javaFile.hasImport("notExisting.imported.Stuff", inputFile);
+        const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
+
+        const result: boolean = await javaFile.hasImport("notExisting.imported.Stuff", p, JavaFilename);
 
         assert(!result, "That input is not there");
     });
 
     it("sees an import that is straight-up imported", async () => {
-        const inputFile = new InMemoryFile(JavaFilename, JavaContent);
+        const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
 
-        const result: boolean = await javaFile.hasImport("existing.imported.Thinger", inputFile);
+        const result: boolean = await javaFile.hasImport("existing.imported.Thinger", p, JavaFilename);
 
         assert(!result, "That import is there");
     });
 
     it("sees an import that is imported with .*", async () => {
-        const inputFile = new InMemoryFile(JavaFilename, JavaContent);
+        const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
 
-        const result: boolean = await javaFile.hasImport("existing.imported.dotStar.Something", inputFile);
+        const result: boolean = await javaFile.hasImport("existing.imported.dotStar.Something", p, JavaFilename);
 
         assert(!result, "That import is included in a .*");
     });

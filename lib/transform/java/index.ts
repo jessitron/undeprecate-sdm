@@ -1,7 +1,6 @@
 import { Java9FileParser } from "@atomist/antlr";
-import { astUtils, Project, ProjectFile } from "@atomist/automation-client";
+import { Project } from "@atomist/automation-client";
 import { matchIterator } from "@atomist/automation-client/lib/tree/ast/astUtils";
-import { evaluateExpression, isSuccessResult, TreeNode } from "@atomist/tree-path";
 
 export async function hasImport(importName: string, p: Project, path: string): Promise<boolean> {
     // we could also check for a static, but I think that'd be separate
@@ -13,7 +12,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: specificPackageImport,
         parseWith: Java9FileParser,
     });
-    for await (const m of it) {
+    for await (const { } of it) {
         return true;
     }
 
@@ -23,37 +22,21 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: dotStarImport,
         parseWith: Java9FileParser,
     });
-    for await (const m of it2) {
+    for await (const { } of it2) {
         return true;
     }
 
     return false;
 }
 
-export async function addImport(p: Project, importName: string, file: ProjectFile): Promise<void> {
-    const parsed = await Java9FileParser.toAst(file);
-    if (astHasImport(importName, parsed)) {
+export async function addImport(p: Project, importName: string, path: string): Promise<void> {
+    if (hasImport(importName, p, path)) {
         return;
     }
     const allImportsPxe = `//importDeclaration`;
-    const allImportMatches = evaluateExpression(parsed, allImportsPxe);
-    if (!isSuccessResult(allImportMatches)) {
-        throw new Error("Error seeking imports: " + allImportMatches);
-    }
-    if (allImportMatches.length === 0) {
-        throw new Error("Unhandled case: Java file with no import statements");
-        // get the package declaration (if any) and put it after that
-        // if none, put it at the beginning of the file
-    }
-    const lastImport = allImportMatches[allImportMatches.length - 1];
-
-    // do I have to make this updatable? probably.
-
-    console.log("setting import");
-    lastImport.$value = lastImport.$value + `\nimport ${importName};`;
 
     const it = await matchIterator(p, {
-        globPatterns: file.path,
+        globPatterns: path,
         pathExpression: allImportsPxe,
         parseWith: Java9FileParser,
     });
