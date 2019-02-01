@@ -2,8 +2,9 @@
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
 import { PushAwareParametersInvocation } from "@atomist/sdm";
 import * as assert from "assert";
-import { replaceGuavaMethodWithStandard }
-    from "../../../lib/transform/deprecatedMethodPackage/byReplace";
+import {
+    replaceGuavaMethodWithStandard,
+} from "../../../lib/transform/deprecatedMethodPackage/byReplace";
 import * as javaFile from "../../../lib/transform/java";
 
 const JavaFilename = "src/main/java/com/undeprecate/UseDeprecatedMethod.java";
@@ -26,16 +27,17 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
     it("changes the old package to the new one", async () => {
         const input = InMemoryProject.of({ path: JavaFilename, content: JavaFileCallingMethodInOldPackage });
 
-        const result = await replaceGuavaMethodWithStandard()(input, fakePapi);
+        await replaceGuavaMethodWithStandard()(input, fakePapi);
 
-        const newContent = input.findFileSync(JavaFilename).getContentSync();
+        const file = input.findFileSync(JavaFilename);
+        const newContent = file.getContentSync();
 
         assert(!newContent.includes("Iterators.emptyIterator"), "replace old method");
         assert(newContent.includes("Collections.emptyIterator"), "with new method");
         assert(javaFile.hasImport("java.util.Collections",
-            input, JavaFilename), "have new import");
+            file), "have new import");
         assert(!javaFile.hasImport("com.google.common.collect.Iterators",
-            input, JavaFilename), "not old import");
+            file), "not old import");
 
     });
 });
