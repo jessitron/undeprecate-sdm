@@ -14,7 +14,7 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
             const content = await f.getContent();
             if (content.includes(oldMethodCall)) {
                 await f.replaceAll(oldMethodCall, newMethodCall);
-                await addImport(project, newPackage, f.path);
+                await addImport(newPackage, project, f.path);
             }
         });
     };

@@ -30,8 +30,8 @@ export async function hasImport(importName: string, p: Project, path: string): P
     return false;
 }
 
-export async function addImport(p: Project, importName: string, path: string): Promise<void> {
-    if (hasImport(importName, p, path)) {
+export async function addImport(importName: string, p: Project, path: string): Promise<void> {
+    if (await hasImport(importName, p, path)) {
         return;
     }
     const allImportsPxe = `//importDeclaration`;

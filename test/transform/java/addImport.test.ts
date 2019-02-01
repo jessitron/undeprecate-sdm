@@ -16,18 +16,19 @@ describe("adding an import", () => {
     it("adds an import that is missing", async () => {
         const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
 
-        await javaFile.addImport(p, "notExisting.imported.Stuff", JavaFilename);
+        await javaFile.addImport("notExisting.imported.Stuff", p, JavaFilename);
 
         const newContent = p.findFileSync(JavaFilename).getContentSync();
 
         assert(newContent.includes(`import notExisting.imported.Stuff;`),
             "where is the import of notExisting.imported.Stuff? found\n" + newContent);
+        assert.strictEqual(countOccurrences(`import notExisting.imported.Stuff;`, newContent), 1, "Too many times!");
     });
 
     it("does not add an import that exists", async () => {
         const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
 
-        await javaFile.addImport(p, "existing.imported.Thinger", JavaFilename);
+        await javaFile.addImport("existing.imported.Thinger", p, JavaFilename);
 
         const newContent = p.findFileSync(JavaFilename).getContentSync();
 
@@ -38,7 +39,7 @@ describe("adding an import", () => {
     it("does not add an import that is imported with .*", async () => {
         const p = InMemoryProject.of({ path: JavaFilename, content: JavaContent });
 
-        await javaFile.addImport(p, "existing.imported.dotStar.Something", JavaFilename);
+        await javaFile.addImport("existing.imported.dotStar.Something", p, JavaFilename);
 
         const newContent = p.findFileSync(JavaFilename).getContentSync();
 
@@ -46,3 +47,7 @@ describe("adding an import", () => {
             "that should have fallen within the .*");
     });
 });
+
+function countOccurrences(ofString: string, inString: string): number {
+    return inString.split(ofString).length - 1;
+}
