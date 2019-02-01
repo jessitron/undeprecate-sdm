@@ -17,7 +17,7 @@ describe("adding an import", () => {
         const inputFile = new InMemoryFile(JavaFilename, JavaContent);
         const p = InMemoryProject.of(inputFile);
 
-        await javaFile.addImport(p,"notExisting.imported.Stuff", inputFile);
+        await javaFile.addImport(p, "notExisting.imported.Stuff", inputFile);
 
         const newContent = p.findFileSync(inputFile.path).getContentSync();
 
@@ -29,7 +29,7 @@ describe("adding an import", () => {
         const inputFile = new InMemoryFile(JavaFilename, JavaContent);
         const p = InMemoryProject.of(inputFile);
 
-        await javaFile.addImport(p,"existing.imported.Thinger", inputFile);
+        await javaFile.addImport(p, "existing.imported.Thinger", inputFile);
 
         const newContent = inputFile.getContentSync();
 
@@ -42,7 +42,7 @@ describe("adding an import", () => {
         const p = InMemoryProject.of(inputFile);
 
 
-        await javaFile.addImport(p,"existing.imported.dotStar.Something", inputFile);
+        await javaFile.addImport(p, "existing.imported.dotStar.Something", inputFile);
 
         const newContent = inputFile.getContentSync();
 
