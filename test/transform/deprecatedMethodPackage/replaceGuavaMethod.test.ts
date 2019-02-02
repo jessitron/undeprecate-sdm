@@ -2,8 +2,8 @@
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
 import { PushAwareParametersInvocation } from "@atomist/sdm";
 import * as assert from "assert";
-import * as javaFile from "../../../lib/transform/java";
 import { replaceGuavaMethodWithStandard } from "../../../lib/transform/deprecatedMethodPackage/replaceGuavaMethod";
+import * as javaFile from "../../../lib/transform/java";
 
 const JavaFilename = "src/main/java/com/undeprecate/UseDeprecatedMethod.java";
 const JavaFileCallingMethodInOldPackage = `package com.jessitron.hg.undeprecate;
@@ -15,6 +15,21 @@ public class UseDeprecatedIterators {
 
     public void doStuff() {
         Iterator<String> it = Iterators.emptyIterator();
+    }
+}
+`;
+
+const JavaFileCallingTwoMethodsInOldPackage = `package com.jessitron.hg.undeprecate;
+
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
+
+public class UseDeprecatedIterators {
+
+    public void doStuff() {
+        Iterator<String> it = Iterators.emptyIterator();
+
+        Iterator<Integer> other = Iterators.cycle(1,2,3);
     }
 }
 `;
@@ -36,6 +51,17 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
             "have new import");
         assert(!(await javaFile.hasImport("com.google.common.collect.Iterators", input, JavaFilename)),
             "old import is still there: " + newContent);
+    });
 
+    it("leaves the old import if it's used elsewhere", async () => {
+        const input = InMemoryProject.of({ path: JavaFilename, content: JavaFileCallingTwoMethodsInOldPackage });
+
+        await replaceGuavaMethodWithStandard()(input, fakePapi);
+
+        const file = input.findFileSync(JavaFilename);
+        const newContent = file.getContentSync();
+
+        assert((await javaFile.hasImport("com.google.common.collect.Iterators", input, JavaFilename)),
+            "old import should remain: " + newContent);
     });
 });

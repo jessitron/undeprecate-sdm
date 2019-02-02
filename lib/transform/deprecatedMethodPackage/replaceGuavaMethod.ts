@@ -16,13 +16,19 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
             if (content.includes(oldMethodCall)) {
                 await f.replaceAll(oldMethodCall, newMethodCall);
                 await addImport(newPackage, project, f.path);
-                //      if (!mightUse(oldPackage, content)) {
-                await removeImport(oldPackage, project, f.path);
-                //    }
+                if (!mightUse(oldPackage, content)) {
+                    await removeImport(oldPackage, project, f.path);
+                }
             }
         });
     };
 }
 
-// function mightUse(qualifiedClass: string, javaFileContent: string): boolean {
-// }
+function mightUse(qualifiedClass: string, javaFileContent: string): boolean {
+
+    const withoutImport = javaFileContent.replace(`import ${qualifiedClass}`, "");
+
+    const justTheClass = qualifiedClass.split(".").pop() || "";
+
+    return new RegExp(`\b${justTheClass}\b`).test(withoutImport);
+}
