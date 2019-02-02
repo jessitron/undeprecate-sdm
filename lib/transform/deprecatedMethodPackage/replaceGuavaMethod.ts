@@ -16,7 +16,8 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
             if (content.includes(oldMethodCall)) {
                 await f.replaceAll(oldMethodCall, newMethodCall);
                 await addImport(newPackage, project, f.path);
-                if (!mightUse(oldPackage, content)) {
+                const newContent = await f.getContent();
+                if (!mightUse(oldPackage, newContent)) {
                     await removeImport(oldPackage, project, f.path);
                 }
             }
@@ -24,11 +25,12 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
     };
 }
 
-function mightUse(qualifiedClass: string, javaFileContent: string): boolean {
+export function mightUse(qualifiedClass: string, javaFileContent: string): boolean {
 
     const withoutImport = javaFileContent.replace(`import ${qualifiedClass}`, "");
 
     const justTheClass = qualifiedClass.split(".").pop() || "";
 
-    return new RegExp(`\b${justTheClass}\b`).test(withoutImport);
+    const r = new RegExp(`\\b${justTheClass}\\b`).test(withoutImport);
+    return r;
 }
