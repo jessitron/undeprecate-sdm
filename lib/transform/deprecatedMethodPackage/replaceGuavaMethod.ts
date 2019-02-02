@@ -1,6 +1,6 @@
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
 import { CodeTransform } from "@atomist/sdm";
-import { addImport } from "../java";
+import { addImport, removeImport } from "../java";
 
 export function replaceGuavaMethodWithStandard(): CodeTransform {
 
@@ -8,6 +8,7 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
     const newMethodCall = "Collections.emptyIterator()";
 
     const newPackage = "java.util.Collections";
+    const oldPackage = "com.google.common.collect.Iterators";
 
     return async project => {
         await doWithFiles(project, "**/*.java", async f => {
@@ -15,7 +16,13 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
             if (content.includes(oldMethodCall)) {
                 await f.replaceAll(oldMethodCall, newMethodCall);
                 await addImport(newPackage, project, f.path);
+                //      if (!mightUse(oldPackage, content)) {
+                await removeImport(oldPackage, project, f.path);
+                //    }
             }
         });
     };
 }
+
+// function mightUse(qualifiedClass: string, javaFileContent: string): boolean {
+// }

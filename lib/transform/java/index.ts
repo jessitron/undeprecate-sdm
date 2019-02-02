@@ -48,6 +48,12 @@ export async function addImport(importName: string, p: Project, path: string): P
     }
 }
 
+export async function removeImport(imported: string, p: Project, path: string): Promise<void> {
+    // this should be simple.
+    const f = await p.findFile(path);
+    await f.replaceAll(`import ${imported};\n`, "");
+}
+
 function dropClassName(qualifiedClass: string): string {
     const segments = qualifiedClass.split(".");
     segments.pop();
