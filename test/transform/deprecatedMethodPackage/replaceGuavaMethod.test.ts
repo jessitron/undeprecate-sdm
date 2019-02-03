@@ -1,6 +1,6 @@
 
 import { InMemoryProject, NoParameters } from "@atomist/automation-client";
-import { PushAwareParametersInvocation } from "@atomist/sdm";
+import { PushAwareParametersInvocation, TransformResult } from "@atomist/sdm";
 import * as assert from "assert";
 import {
     mightUse,
@@ -115,7 +115,8 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
     it("adds a TODO if the old method is used from a static import .*", async () => {
         const inputProject = InMemoryProject.of({ path: JavaFilename, content: JavaFileWithStaticImportStar });
 
-        await replaceGuavaMethodWithStandard()(inputProject, fakePapi);
+        const result: TransformResult = await replaceGuavaMethodWithStandard()(inputProject, fakePapi) as TransformResult;
+        assert(result.edited);
 
         const file = inputProject.findFileSync(JavaFilename);
         const newContent = file.getContentSync();

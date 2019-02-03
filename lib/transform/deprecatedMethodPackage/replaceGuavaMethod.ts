@@ -1,5 +1,5 @@
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
-import { CodeTransform } from "@atomist/sdm";
+import { CodeTransform, TransformResult } from "@atomist/sdm";
 import {
     addImport, addStaticImport,
     hasStaticImport, removeImport, removeStaticImport,
@@ -19,10 +19,12 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
 
     const todo = `/* TODO: use ${newPackage}.${methodName} */`;
 
-    return async project => {
+    return async (project): Promise<TransformResult> => {
+        let edited = false;
         await doWithFiles(project, "**/*.java", async f => {
             const content = await f.getContent();
             if (content.includes(oldMethodCall)) {
+                edited = true;
                 await f.replaceAll(oldMethodCall, newMethodCall);
                 await addImport(newPackage, project, f.path);
                 const newContent = await f.getContent();
@@ -33,15 +35,21 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
                 const oldStaticImport = oldPackage + "." + methodName;
                 // maybe it is statically imported
                 if (await hasStaticImport(oldStaticImport, project, f.path)) {
+                    edited = true;
                     await addStaticImport(newPackage + "." + methodName, project, f.path);
                     await removeStaticImport(oldStaticImport, project, f.path);
                 } else if (hasStaticImport(oldPackage + ".*", project, f.path)) {
                     // if it is statically imported with .*
+                    edited = true;
                     await f.replaceAll(methodCall, methodCall + " " + todo);
                 }
             }
-
         });
+        return {
+            success: true,
+            edited,
+            target: project,
+        };
     };
 }
 
