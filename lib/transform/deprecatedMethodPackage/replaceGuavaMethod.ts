@@ -1,10 +1,14 @@
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
 import { CodeTransform } from "@atomist/sdm";
-import { addImport, removeImport } from "../java";
+import { addImport, hasStaticImport, removeImport, addStaticImport, removeStaticImport } from "../java";
 
 export function replaceGuavaMethodWithStandard(): CodeTransform {
 
-    const oldMethodCall = "Iterators.emptyIterator()";
+    const methodName = "emptyIterator";
+    const methodCall = methodName + "()";
+    const oldClassName = "Iterators";
+
+    const oldMethodCall = oldClassName + "." + methodCall;
     const newMethodCall = "Collections.emptyIterator()";
 
     const newPackage = "java.util.Collections";
@@ -20,7 +24,15 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
                 if (!mightUse(oldPackage, newContent)) {
                     await removeImport(oldPackage, project, f.path);
                 }
+            } else if (content.includes(methodCall)) {
+                const oldStaticImport = oldPackage + "." + methodName;
+                // maybe it is statically imported
+                if (await hasStaticImport(oldStaticImport, project, f.path)) {
+                    await addStaticImport(newPackage + "." + methodName, project, f.path);
+                    await removeStaticImport(oldStaticImport, project, f.path);
+                }
             }
+
         });
     };
 }

@@ -30,6 +30,17 @@ export async function hasImport(importName: string, p: Project, path: string): P
     return false;
 }
 
+export async function hasStaticImport(importName: string, p: Project, path: string): Promise<boolean> {
+    /*
+     * the path expression is complicated.
+     * //singleStaticImportDeclaration[/typeName[@value='com.google.common.collect.Iterators']]
+/identifier/Identifier[@value='emptyIterator']
+     */
+    const expectedImportString = `import static ${importName};`;
+    const content = await p.findFile(path).then(f => f.getContent());
+    return content.includes(expectedImportString);
+}
+
 export async function addImport(importName: string, p: Project, path: string): Promise<void> {
     if (await hasImport(importName, p, path)) {
         return;
@@ -48,10 +59,33 @@ export async function addImport(importName: string, p: Project, path: string): P
     }
 }
 
+export async function addStaticImport(importName: string, p: Project, path: string): Promise<void> {
+    if (await hasImport(importName, p, path)) {
+        return;
+    }
+    const allImportsPxe = `//importDeclaration`;
+
+    const it = await matchIterator(p, {
+        globPatterns: path,
+        pathExpression: allImportsPxe,
+        parseWith: Java9FileParser,
+    });
+    for await (const m of it) {
+        m.$value = `import static ${importName};\n${m.$value}`;
+        break;
+    }
+}
+
 export async function removeImport(imported: string, p: Project, path: string): Promise<void> {
     // this should be simple.
     const f = await p.findFile(path);
     await f.replaceAll(`import ${imported};\n`, "");
+}
+
+export async function removeStaticImport(imported: string, p: Project, path: string): Promise<void> {
+    // this should be simple.
+    const f = await p.findFile(path);
+    await f.replaceAll(`import static ${imported};\n`, "");
 }
 
 function dropClassName(qualifiedClass: string): string {

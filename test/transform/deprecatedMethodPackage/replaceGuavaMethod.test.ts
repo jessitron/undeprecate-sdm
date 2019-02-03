@@ -4,7 +4,7 @@ import { PushAwareParametersInvocation } from "@atomist/sdm";
 import * as assert from "assert";
 import {
     mightUse,
-    replaceGuavaMethodWithStandard
+    replaceGuavaMethodWithStandard,
 } from "../../../lib/transform/deprecatedMethodPackage/replaceGuavaMethod";
 import * as javaFile from "../../../lib/transform/java";
 
@@ -36,6 +36,19 @@ public class UseDeprecatedIterators {
     }
 }
 `;
+
+const JavaFileWithStaticImport = `package com.jessitron.hg.undeprecate;
+
+import static com.google.common.collect.Iterators.emptyIterator;
+
+import java.util.Iterator;
+
+public class UseDeprecatedIteratorsWithStaticImport {
+
+    public void doStuff() {
+        Iterator<String> it = emptyIterator();
+    }
+}`;
 
 const fakePapi: PushAwareParametersInvocation<NoParameters> = {} as any;
 
@@ -69,6 +82,20 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
             newContent);
         assert((await javaFile.hasImport("com.google.common.collect.Iterators", inputProject, JavaFilename)),
             "old import should remain: " + newContent);
+    });
+
+    it("changes a static import", async () => {
+        const inputProject = InMemoryProject.of({ path: JavaFilename, content: JavaFileWithStaticImport });
+
+        await replaceGuavaMethodWithStandard()(inputProject, fakePapi);
+
+        const file = inputProject.findFileSync(JavaFilename);
+        const newContent = file.getContentSync();
+
+        assert(await javaFile.hasStaticImport("java.util.Collections.emptyIterator", inputProject, JavaFilename),
+            "have new import. Has: " + newContent);
+        assert(!(await javaFile.hasStaticImport("com.google.common.collect.Iterators.emptyIterator", inputProject, JavaFilename)),
+            "old import is still there: " + newContent);
     });
 });
 
