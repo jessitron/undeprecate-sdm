@@ -50,6 +50,20 @@ public class UseDeprecatedIteratorsWithStaticImport {
     }
 }`;
 
+const JavaFileWithStaticImportStar = `package com.jessitron.hg.undeprecate;
+
+import java.util.Iterator;
+
+import static com.google.common.collect.Iterators.*;
+
+public class UseDeprecatedIteratorsWithStaticImportStar {
+
+    public void doStuff() {
+        Iterator<String> it = emptyIterator();
+    }
+}
+`;
+
 const fakePapi: PushAwareParametersInvocation<NoParameters> = {} as any;
 
 describe("Changes a call to a Guava method to the new standard one in Java Collections", () => {
@@ -96,6 +110,18 @@ describe("Changes a call to a Guava method to the new standard one in Java Colle
             "have new import. Has: " + newContent);
         assert(!(await javaFile.hasStaticImport("com.google.common.collect.Iterators.emptyIterator", inputProject, JavaFilename)),
             "old import is still there: " + newContent);
+    });
+
+    it("adds a TODO if the old method is used from a static import .*", async () => {
+        const inputProject = InMemoryProject.of({ path: JavaFilename, content: JavaFileWithStaticImportStar });
+
+        await replaceGuavaMethodWithStandard()(inputProject, fakePapi);
+
+        const file = inputProject.findFileSync(JavaFilename);
+        const newContent = file.getContentSync();
+
+        assert(newContent.includes("/* TODO: use java.util.Collections.emptyIterator */"),
+            "Where is the TODO? " + newContent);
     });
 });
 

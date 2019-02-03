@@ -1,6 +1,9 @@
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
 import { CodeTransform } from "@atomist/sdm";
-import { addImport, hasStaticImport, removeImport, addStaticImport, removeStaticImport } from "../java";
+import {
+    addImport, addStaticImport,
+    hasStaticImport, removeImport, removeStaticImport,
+} from "../java";
 
 export function replaceGuavaMethodWithStandard(): CodeTransform {
 
@@ -13,6 +16,8 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
 
     const newPackage = "java.util.Collections";
     const oldPackage = "com.google.common.collect.Iterators";
+
+    const todo = `/* TODO: use ${newPackage}.${methodName} */`;
 
     return async project => {
         await doWithFiles(project, "**/*.java", async f => {
@@ -30,6 +35,9 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
                 if (await hasStaticImport(oldStaticImport, project, f.path)) {
                     await addStaticImport(newPackage + "." + methodName, project, f.path);
                     await removeStaticImport(oldStaticImport, project, f.path);
+                } else if (hasStaticImport(oldPackage + ".*", project, f.path)) {
+                    // if it is statically imported with .*
+                    await f.replaceAll(methodCall, methodCall + " " + todo);
                 }
             }
 
