@@ -7,7 +7,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
     const specificPackageImport =
         `/compilationUnit//importDeclaration//typeName[@value='${importName}']`;
 
-    const it = await matchIterator(p, {
+    const it = matchIterator(p, {
         globPatterns: path,
         pathExpression: specificPackageImport,
         parseWith: Java9FileParser,
@@ -18,7 +18,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
 
     const oneHigherPackage = dropClassName(importName);
     const dotStarImport = `/compilationUnit//importDeclaration[//MUL]//packageOrTypeName[@value='${oneHigherPackage}']`;
-    const it2 = await matchIterator(p, {
+    const it2 = matchIterator(p, {
         globPatterns: path,
         pathExpression: dotStarImport,
         parseWith: Java9FileParser,
@@ -47,7 +47,7 @@ export async function addImport(importName: string, p: Project, path: string): P
     }
     const allImportsPxe = `//importDeclaration`;
 
-    const it = await matchIterator(p, {
+    const it = matchIterator(p, {
         globPatterns: path,
         pathExpression: allImportsPxe,
         parseWith: Java9FileParser,
@@ -65,7 +65,7 @@ export async function addStaticImport(importName: string, p: Project, path: stri
     }
     const allImportsPxe = `//importDeclaration`;
 
-    const it = await matchIterator(p, {
+    const it = matchIterator(p, {
         globPatterns: path,
         pathExpression: allImportsPxe,
         parseWith: Java9FileParser,

@@ -1,3 +1,4 @@
+import { Project } from "@atomist/automation-client";
 import { doWithFiles } from "@atomist/automation-client/lib/project/util/projectUtils";
 import { CodeTransform, TransformResult } from "@atomist/sdm";
 import {
@@ -19,7 +20,7 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
 
     const todo = `/* TODO: use ${newPackage}.${methodName} */`;
 
-    return async (project): Promise<TransformResult> => {
+    return async (project, inv): Promise<TransformResult> => {
         let edited = false;
         await doWithFiles(project, "**/*.java", async f => {
             const content = await f.getContent();
@@ -41,6 +42,7 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
                 } else if (hasStaticImport(oldPackage + ".*", project, f.path)) {
                     // if it is statically imported with .*
                     edited = true;
+                    await inv.addressChannels(`Warning: ${linkToFile(project, f.path)} uses a static .* import. Putting a TODO in it`);
                     await f.replaceAll(methodCall, methodCall + " " + todo);
                 }
             }
@@ -51,6 +53,10 @@ export function replaceGuavaMethodWithStandard(): CodeTransform {
             target: project,
         };
     };
+}
+
+function linkToFile(project: Project, path: string): string {
+    return `${path} in ${project.id.owner}/${project.id.repo}`;
 }
 
 export function mightUse(qualifiedClass: string, javaFileContent: string): boolean {

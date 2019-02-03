@@ -64,7 +64,8 @@ public class UseDeprecatedIteratorsWithStaticImportStar {
 }
 `;
 
-const fakePapi: PushAwareParametersInvocation<NoParameters> = {} as any;
+// ts-lint:disable-next-line
+const fakePapi: PushAwareParametersInvocation<NoParameters> = { addressChannels() { } } as any;
 
 describe("Changes a call to a Guava method to the new standard one in Java Collections", () => {
 

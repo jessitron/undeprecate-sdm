@@ -25,8 +25,8 @@ import {
 } from "@atomist/sdm-core";
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
-import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/byReplace";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
+import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
 
 /**
  * Initialize an sdm definition, and add functionality to it.

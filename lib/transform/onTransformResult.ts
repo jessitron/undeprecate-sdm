@@ -5,7 +5,7 @@ import { Attachment, Field, SlackMessage } from "@atomist/slack-messages";
 
 export async function actualGoodUsefulReactionToTransformResults(
     trs: TransformResult[],
-    cli: CommandListenerInvocation) {
+    cli: CommandListenerInvocation): Promise<void> {
 
     const attachments: Attachment[] = trs.map(tr => {
         const projectId = tr.target.id;
