@@ -15,11 +15,11 @@ function simpleMethodCallGrammar(): Grammar<Call> {
     });
 }
 
-export function writeBytesWithBytes(): CodeTransform {
+export function writeBytesWithBytes(globPatterns: string = "**/*.java"): CodeTransform {
     // writeBytes("thing") -> write("thing".getBytes(Charsets.UTF_8))
     return async p => {
         const it = astUtils.matchIterator<Call>(p, {
-            globPatterns: "**/*.java",
+            globPatterns,
             pathExpression: "//file/call[/methodCall[@value='writeBytes']]",
             parseWith: new MicrogrammarBasedFileParser("file", "call",
                 simpleMethodCallGrammar()),

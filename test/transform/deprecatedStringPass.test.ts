@@ -42,8 +42,7 @@ describe("change how you pass a string to writeBytes", () => {
         const result = await writeBytesWithBytes()(p, fakePapi);
         const newContent = p.findFileSync(JavaFilename).getContentSync();
 
-        assert(newContent.includes(`op.writeBytes(
-            "I am the string of danger".getBytes(Charsets.UTF_8))`), newContent); // i don't really care about the whitespace
+        assert(newContent.includes(`op.write("I am the string of danger".getBytes(Charsets.UTF_8))`), newContent); // i don't really care about the whitespace
         assert(javaFile.hasImport("com.google.common.base.Charsets", p, JavaFilename));
         assert(!newContent.includes("writeBytes"), "This should call write instead of writeBytes\n" + newContent);
     });
