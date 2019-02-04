@@ -15,6 +15,7 @@
  */
 
 import {
+    announceTransformResults,
     CommandListenerInvocation,
     SoftwareDeliveryMachine,
     SoftwareDeliveryMachineConfiguration,
@@ -25,8 +26,8 @@ import {
 } from "@atomist/sdm-core";
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
-import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
+import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 import { writeBytesWithBytes } from "../transform/writeBytesWithBytes";
 
 /**
@@ -50,7 +51,7 @@ export function machine(
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),
-        onTransformResults: actualGoodUsefulReactionToTransformResults,
+        onTransformResults: announceTransformResults,
     });
 
     sdm.addCodeTransformCommand({
@@ -60,7 +61,7 @@ export function machine(
             deprecatedMethodName: "createEntrySet",
             replacementMethodName: "entrySet",
         }),
-        onTransformResults: actualGoodUsefulReactionToTransformResults,
+        onTransformResults: announceTransformResults,
     });
 
     sdm.addCodeTransformCommand({
@@ -68,7 +69,7 @@ export function machine(
         description: "change deprecated emptyIterator to modern one",
         intent: "update emptyIterator",
         transform: replaceGuavaMethodWithStandard(),
-        onTransformResults: actualGoodUsefulReactionToTransformResults,
+        onTransformResults: announceTransformResults,
     });
 
     sdm.addCodeTransformCommand({
@@ -76,7 +77,7 @@ export function machine(
         description: "change deprecated writeBytes to write(...getBytes)",
         intent: "replace writeBytes",
         transform: writeBytesWithBytes(),
-        onTransformResults: actualGoodUsefulReactionToTransformResults,
+        onTransformResults: announceTransformResults,
     });
 
     return sdm;
