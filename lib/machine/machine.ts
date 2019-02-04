@@ -27,6 +27,7 @@ import {
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
+import { noticeAllMethodCalls } from "../transform/noticeAllMethodCalls";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 import { writeBytesWithBytes } from "../transform/writeBytesWithBytes";
 
@@ -77,6 +78,13 @@ export function machine(
         description: "change deprecated writeBytes to write(...getBytes)",
         intent: "replace writeBytes",
         transform: writeBytesWithBytes(),
+        onTransformResults: announceTransformResults,
+    });
+
+    sdm.addCodeTransformCommand({
+        name: "this is just for an example",
+        transform: noticeAllMethodCalls(),
+        intent: "count method calls",
         onTransformResults: announceTransformResults,
     });
 
