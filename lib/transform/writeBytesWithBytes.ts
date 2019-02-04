@@ -1,6 +1,10 @@
 import { astUtils, MicrogrammarBasedFileParser } from "@atomist/automation-client";
+import {
+    Grammar,
+    microgrammar,
+    parenthesizedExpression,
+} from "@atomist/microgrammar";
 import { CodeTransform } from "@atomist/sdm";
-import { Grammar, microgrammar, parenthesizedExpression } from "@atomist/microgrammar";
 
 interface Call {
     methodCall: string;

@@ -12,7 +12,7 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: specificPackageImport,
         parseWith: Java9FileParser,
     });
-    for await (const { } of it) {
+    if (await hasAtLeastOne(it)) {
         return true;
     }
 
@@ -23,11 +23,15 @@ export async function hasImport(importName: string, p: Project, path: string): P
         pathExpression: dotStarImport,
         parseWith: Java9FileParser,
     });
-    for await (const { } of it2) {
+    if (await hasAtLeastOne(it2)) {
         return true;
     }
 
     return false;
+}
+
+async function hasAtLeastOne(it: AsyncIterable<any>): Promise<boolean> {
+    return !(await it[Symbol.asyncIterator]().next()).done;
 }
 
 export async function hasStaticImport(importName: string, p: Project, path: string): Promise<boolean> {
