@@ -8,9 +8,9 @@ interface Call {
     singleArg: { block: string };
 }
 
-function oldMethodGrammar(oldMethodName: string): Grammar<Call> {
+function simpleMethodCallGrammar(): Grammar<Call> {
     return microgrammar<Call>({
-        methodCall: oldMethodName,
+        methodCall: /[a-zA-Z_$][a-zA-Z0-9_$]+/,
         singleArg: parenthesizedExpression(),
     });
 }
@@ -20,13 +20,13 @@ export function writeBytesWithBytes(): CodeTransform {
     return async p => {
         const it = astUtils.matchIterator<Call>(p, {
             globPatterns: "**/*.java",
-            pathExpression: "//file/call",
+            pathExpression: "//file/call[/methodCall[@value='writeBytes']]",
             parseWith: new MicrogrammarBasedFileParser("file", "call",
-                oldMethodGrammar("writeBytes")),
+                simpleMethodCallGrammar()),
         });
         for await (const match of it) {
             // console.log(match);
-            match.$value = `write${match.singleArg.block}.getBytes(Charsets.UTF_8)`;
+            match.$value = `write(${match.singleArg.block}.getBytes(Charsets.UTF_8)`;
         }
     };
 }
