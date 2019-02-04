@@ -1,10 +1,12 @@
-import { astUtils, MicrogrammarBasedFileParser } from "@atomist/automation-client";
+import { astUtils, MatchResult, MicrogrammarBasedFileParser } from "@atomist/automation-client";
 import {
     Grammar,
     microgrammar,
     parenthesizedExpression,
 } from "@atomist/microgrammar";
+import { PatternMatch } from "@atomist/microgrammar/lib/PatternMatch";
 import { CodeTransform } from "@atomist/sdm";
+import { addImport } from "./java";
 
 interface Call {
     methodCall: string;
@@ -22,15 +24,19 @@ function simpleMethodCallGrammar(): Grammar<Call> {
 export function writeBytesWithBytes(globPatterns: string = "**/*.java"): CodeTransform {
     // writeBytes("thing") -> write("thing".getBytes(Charsets.UTF_8))
     return async p => {
-        const it = astUtils.matchIterator<Call>(p, {
+        const it = astUtils.fileHitIterator(p, {
             globPatterns,
             pathExpression: "//file/call[/methodCall[@value='writeBytes']]",
             parseWith: new MicrogrammarBasedFileParser("file", "call",
                 simpleMethodCallGrammar()),
         });
-        for await (const match of it) {
-            // console.log(match);
-            match.$value = `write(${match.singleArg.block}.getBytes(Charsets.UTF_8)`;
+        for await (const fileHit of it) {
+            for (const match of fileHit.matches) {
+                const typedMatch = match as (MatchResult & Call);
+                // console.log(match);
+                typedMatch.$value = `write(${typedMatch.singleArg.block}.getBytes(Charsets.UTF_8)`;
+            }
+            await addImport("com.google.common.base.Charsets", p, fileHit.file.path);
         }
     };
 }
