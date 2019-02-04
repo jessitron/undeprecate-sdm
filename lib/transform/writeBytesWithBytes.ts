@@ -4,7 +4,8 @@ import { Grammar, microgrammar, parenthesizedExpression } from "@atomist/microgr
 
 interface Call {
     methodCall: string;
-    singleArg: string;
+    // Comes from parenthesizedExpression
+    singleArg: { block: string };
 }
 
 function oldMethodGrammar(oldMethodName: string): Grammar<Call> {
@@ -20,11 +21,12 @@ export function writeBytesWithBytes(): CodeTransform {
         const it = astUtils.matchIterator<Call>(p, {
             globPatterns: "**/*.java",
             pathExpression: "//file/call",
-            parseWith: new MicrogrammarBasedFileParser("file", "call", oldMethodGrammar("writeBytes")),
+            parseWith: new MicrogrammarBasedFileParser("file", "call",
+                oldMethodGrammar("writeBytes")),
         });
         for await (const match of it) {
-           // console.log(match);
-            match.$value = `write${(match as any).singleArg.block}.getBytes(Charsets.UTF_8)`;
+            // console.log(match);
+            match.$value = `write${match.singleArg.block}.getBytes(Charsets.UTF_8)`;
         }
     };
 }
