@@ -27,6 +27,7 @@ import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byM
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
+import { writeBytesWithBytes } from "../transform/writeBytesWithBytes";
 
 /**
  * Initialize an sdm definition, and add functionality to it.
@@ -70,11 +71,13 @@ export function machine(
         onTransformResults: actualGoodUsefulReactionToTransformResults,
     });
 
-    /*
-     * this is a good place to type
-    sdm.
-     * and see what the IDE suggests for after the dot
-     */
+    sdm.addCodeTransformCommand({
+        name: "replace calls to writeBytes",
+        description: "change deprecated writeBytes to write(...getBytes)",
+        intent: "replace writeBytes",
+        transform: writeBytesWithBytes(),
+        onTransformResults: actualGoodUsefulReactionToTransformResults,
+    });
 
     return sdm;
 }
