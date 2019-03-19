@@ -24,6 +24,7 @@ import {
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
+import { lookAtAnnotationParameters } from "../annotationParameters/inspection";
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
@@ -43,6 +44,14 @@ export function machine(
     const sdm = createSoftwareDeliveryMachine({
         name: "Undeprecating SDM",
         configuration,
+    });
+
+    sdm.addCodeInspectionCommand({
+        name: "Look at SpringApplicationParameters",
+        inspection: lookAtAnnotationParameters({ annotationName: "SpringBootApplication" }),
+        onInspectionResults(results, ci): Promise<void> {
+            return ci.addressChannels(JSON.stringify(results));
+        },
     });
 
     sdm.addCodeTransformCommand({
