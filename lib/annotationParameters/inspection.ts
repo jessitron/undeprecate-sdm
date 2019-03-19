@@ -1,19 +1,19 @@
 import { Java9FileParser } from "@atomist/antlr";
-import { astUtils, Project, ProjectReview, ReviewComment } from "@atomist/automation-client";
-import { PatternMatch } from "@atomist/microgrammar/lib/PatternMatch";
-import { CodeInspection } from "@atomist/sdm";
+import { astUtils, MatchResult, Project, ProjectReview, ReviewComment } from "@atomist/automation-client";
+import { CodeInspection, CodeInspectionResult, CommandListenerInvocation } from "@atomist/sdm";
+import { TreeNode } from "@atomist/tree-path";
 
 interface AnnotationAstNode {
     normalAnnotation?: {
-        elementValuePairList: PatternMatch & {
+        elementValuePairList: TreeNode & {
             elementValuePairs: Array<{
                 identifier: { Identifier: string },
-                elementValue: PatternMatch,
+                elementValue: MatchResult,
             }>,
         },
     };
     singleElementAnnotation?: {
-        elementValue: PatternMatch,
+        elementValue: TreeNode,
     };
 }
 
@@ -29,11 +29,14 @@ export function lookAtAnnotationParameters(params:
             "src/main/java/**/*Application.java", `//annotation[//identifier[@value='${params.annotationName}']]`,
         );
 
+        // Create a review comment with the contents of the parameters, or else "no parameters"
         const comments: ReviewComment[] = matches.map(m => {
             let detail;
             if (m.normalAnnotation) {
-                detail = m.normalAnnotation.elementValuePairList.$value;
+                // there are multiple parameters; stick the whole list in there
+                detail = m.normalAnnotation.elementValuePairList.$value || "";
             } else if (m.singleElementAnnotation) {
+                // there is one parameter; it defaults to be called 'value'
                 detail = "value = " + m.singleElementAnnotation.elementValue.$value;
             } else {
                 detail = "no parameters";
@@ -48,4 +51,15 @@ export function lookAtAnnotationParameters(params:
 
         return { repoId: p.id, comments };
     };
+}
+
+export function printInspectionResults(
+    results: Array<CodeInspectionResult<ProjectReview>>,
+    ci: CommandListenerInvocation): Promise<void> {
+    return ci.addressChannels(results.map(r => {
+        if (!r.result || r.result.comments.length < 1) {
+            return "no SpringBootApplication annotation found in " + r.repoId.repo;
+        }
+        return r.repoId.repo + " SpringBootApplication(" + r.result.comments.map(c => c.detail).join(" ...and... ") + ")";
+    }).join("\n"));
 }

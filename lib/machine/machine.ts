@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { ProjectReview } from "@atomist/automation-client";
 import {
     announceTransformResults,
+    CodeInspectionResult,
     CommandListenerInvocation,
     SoftwareDeliveryMachine,
     SoftwareDeliveryMachineConfiguration,
@@ -24,12 +26,11 @@ import {
 import {
     createSoftwareDeliveryMachine,
 } from "@atomist/sdm-core";
-import { lookAtAnnotationParameters } from "../annotationParameters/inspection";
+import { lookAtAnnotationParameters, printInspectionResults } from "../annotationParameters/inspection";
 import { changeDeprecatedMethodWithAST } from "../transform/deprecatedMethod/byMethodCall";
 import { changeDeprecatedMethodWithReplace } from "../transform/deprecatedMethod/byReplace";
 import { replaceGuavaMethodWithStandard } from "../transform/deprecatedMethodPackage/replaceGuavaMethod";
 import { noticeAllMethodCalls } from "../transform/noticeAllMethodCalls";
-import { actualGoodUsefulReactionToTransformResults } from "../transform/onTransformResult";
 import { writeBytesWithBytes } from "../transform/writeBytesWithBytes";
 
 /**
@@ -47,11 +48,10 @@ export function machine(
     });
 
     sdm.addCodeInspectionCommand({
-        name: "Look at SpringApplicationParameters",
+        name: "Look at SpringBootApplication parameters",
+        intent: "check SpringBootApplication parameters",
         inspection: lookAtAnnotationParameters({ annotationName: "SpringBootApplication" }),
-        onInspectionResults(results, ci): Promise<void> {
-            return ci.addressChannels(JSON.stringify(results));
-        },
+        onInspectionResults: printInspectionResults,
     });
 
     sdm.addCodeTransformCommand({
